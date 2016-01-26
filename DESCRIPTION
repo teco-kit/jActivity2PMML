@@ -1,0 +1,10 @@
+Package: jActivity2PMML
+Type: Package
+Title: jActivity to PMML converter
+Version: 1.0
+Date: 2015-12-28
+Author: Anja Bachmann
+Maintainer: Anja Bachmann <bachmann@teco.edu>
+Description: This package blabla.
+License: GPL 3
+LazyData: true
