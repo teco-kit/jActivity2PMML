@@ -84,13 +84,14 @@ getPMML <- function(json_data){
   
   sn = paste(sensorNames,collapse='-' )
   output = paste(sn,"_",classifier,".xml",sep="")
-  # TODO: problem mit leerzeichebn in predictionClass --> anders übergeben und dann oben für mysql neu aufbereiten
+  
+  # TODO: problem mit leerzeichen in predictionClass --> anders übergeben und dann oben für mysql neu aufbereiten
   
   switch(classifier,
          rpart = {
            print("rpart")
            fit <- rpart(label ~ ., data=sensorvalues,maxsurrogate=0) # no surrogates as it is easier to be handled, esp. if we want to reuse the code for randomForests
-           return(saveXML(pmml(fit), output))
+           return(saveXML(pmml(fit)))
          },
          ramdomForest = {
            print("randomforest")
