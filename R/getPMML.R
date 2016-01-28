@@ -20,6 +20,17 @@ getPMML <- function(json_data){
   # establish a connection to the database
   mydb = dbConnect(MySQL(), user='admin', password='admin', dbname='jactivity2', host='mysql', port=3306)
 
+  if(length(predictionClass)>1){
+	predictionClassDB = paste("(",predictionClass[1],sep="")
+	for(i in 2:length(predictionClass)) %do%  
+	{
+		predictionClassDB = paste(predictionClassDB,", ",predictionClass[i],sep="")
+	}  
+	predictionClassDB = paste(predictionClassDB,")",sep="")
+  }else{
+	predictionClassDB = paste("(",predictionClass,")",sep="")
+  }
+  
   # if we want to get sensor data dynamically 
   library(foreach)
   ifelse(grepl("other",predictionClass),{ 
@@ -32,7 +43,7 @@ getPMML <- function(json_data){
     # if only true labels are in predictionClass then only get the prediction class data
     foreach(s=sensorNames)%do%
     {
-      assign(s, dbGetQuery(mydb, paste("select * from ",s," where label in (",predictionClass,")",sep="")))
+      assign(s, dbGetQuery(mydb, paste("select * from ",s," where label in (",predictionClassDB,")",sep="")))
     }
   }
   )
