@@ -18,7 +18,7 @@ getPMML <- function(json_data){
   library(RMySQL)
     
   # establish a connection to the database
-  mydb = dbConnect(MySQL(), user='admin', password='admin', dbname='jactivity2', host='129.13.170.220', port=3307)
+  mydb = dbConnect(MySQL(), user='admin', password='admin', dbname='jactivity2', host='mysql', port=3307)
 
   # if we want to get sensor data dynamically 
   library(foreach)
