@@ -20,17 +20,17 @@ getPMML <- function(json_data){
   # establish a connection to the database
   mydb = dbConnect(MySQL(), user='admin', password='admin', dbname='jactivity2', host='mysql', port=3306)
 
-  if(length(predictionClass)>1){
-	  predictionClassDB = paste("(","\"",predictionClass[1],"\"",sep="")
+  ifelse(length(predictionClass)>1,{
+	  predictionClassDB = paste("(",'"',predictionClass[1],'"',sep="")
 	  for(i in 2:length(predictionClass)) 
 	  {
-		  predictionClassDB = paste(predictionClassDB,", ","\"",predictionClass[i],"\"",sep="")
+		  predictionClassDB = paste(predictionClassDB,", ",'"',predictionClass[i],'"',sep="")
 	  }  
 	  predictionClassDB = paste(predictionClassDB,")",sep="")
-  }
-  else{
-	  predictionClassDB = paste("(","\"",predictionClass,"\"",")",sep="")
-  }
+  },{
+	  predictionClassDB = paste("(",'"',predictionClass,'"',")",sep="")
+  })
+  
   
   # if we want to get sensor data dynamically 
   library(foreach)
@@ -38,13 +38,17 @@ getPMML <- function(json_data){
     # if "other" in predictionClass then get everything to define later on that other is the rest
     foreach(s=sensorNames)%do%
     {
-      assign(s, dbGetQuery(mydb, paste("select * from ",s,sep=" ")))
+      query = paste("select * from ",s," where label in ",predictionClassDB,sep="")
+      print(query)
+      assign(s, dbGetQuery(mydb, query))
     }
   },{
     # if only true labels are in predictionClass then only get the prediction class data
     foreach(s=sensorNames)%do%
     {
-      assign(s, dbGetQuery(mydb, paste("select * from ",s," where label in (",predictionClassDB,")",sep="")))
+      query = paste("select * from ",s," where label in ",predictionClassDB,sep="")
+      print(query)
+      assign(s, dbGetQuery(mydb, query))
     }
   }
   )
