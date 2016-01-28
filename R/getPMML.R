@@ -21,14 +21,15 @@ getPMML <- function(json_data){
   mydb = dbConnect(MySQL(), user='admin', password='admin', dbname='jactivity2', host='mysql', port=3306)
 
   if(length(predictionClass)>1){
-	predictionClassDB = paste("(",predictionClass[1],sep="")
-	for(i in 2:length(predictionClass)) 
-	{
-		predictionClassDB = paste(predictionClassDB,", ",predictionClass[i],sep="")
-	}  
-	predictionClassDB = paste(predictionClassDB,")",sep="")
-  }else{
-	predictionClassDB = paste("(",predictionClass,")",sep="")
+	  predictionClassDB = paste("(","\"",predictionClass[1],"\"",sep="")
+	  for(i in 2:length(predictionClass)) 
+	  {
+		  predictionClassDB = paste(predictionClassDB,", ","\"",predictionClass[i],"\"",sep="")
+	  }  
+	  predictionClassDB = paste(predictionClassDB,")",sep="")
+  }
+  else{
+	  predictionClassDB = paste("(","\"",predictionClass,"\"",")",sep="")
   }
   
   # if we want to get sensor data dynamically 
