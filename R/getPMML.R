@@ -32,7 +32,7 @@ getPMML <- function(json_data){
     # if only true labels are in predictionClass then only get the prediction class data
     foreach(s=sensorNames)%do%
     {
-      assign(s, dbGetQuery(mydb, paste("select * from ",s," where label in ",predictionClass,sep=" ")))
+      assign(s, dbGetQuery(mydb, paste("select * from ",s," where label in (",predictionClass,")",sep=" ")))
     }
   }
   )
