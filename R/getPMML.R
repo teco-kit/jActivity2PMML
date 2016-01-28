@@ -22,7 +22,7 @@ getPMML <- function(json_data){
 
   if(length(predictionClass)>1){
 	predictionClassDB = paste("(",predictionClass[1],sep="")
-	for(i in 2:length(predictionClass)) %do%  
+	for(i in 2:length(predictionClass)) 
 	{
 		predictionClassDB = paste(predictionClassDB,", ",predictionClass[i],sep="")
 	}  
