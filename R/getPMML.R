@@ -93,9 +93,9 @@ getPMML <- function(json_data){
            fit <- rpart(label ~ ., data=sensorvalues,maxsurrogate=0) # no surrogates as it is easier to be handled, esp. if we want to reuse the code for randomForests
            return(saveXML(pmml(fit)))
          },
-         ramdomForest = {
+         randomForest = {
            print("randomforest")
-           fit <- ramdomForest(label ~ ., data=sensorvalues)
+           fit <- randomForest(label ~ ., data=sensorvalues)
            return(saveXML(pmml(fit), paste(sensorNames,"_",predictionClass,"_",classifier,".xml",sep="")))
          },
          naiveBayes = {
