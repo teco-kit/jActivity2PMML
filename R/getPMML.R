@@ -82,8 +82,6 @@ getPMML <- function(json_data){
   sensorvalues[,-c(grep("useragent", colnames(sensorvalues)),grep("label", colnames(sensorvalues)))] <- sapply(sensorvalues[, -c(grep("useragent", colnames(sensorvalues)),grep("label", colnames(sensorvalues)))], as.numeric)
   
   
-  sn = paste(sensorNames,collapse='-' )
-  output = paste(sn,"_",classifier,".xml",sep="")
   
   # TODO: problem mit leerzeichen in predictionClass --> anders übergeben und dann oben für mysql neu aufbereiten
   
@@ -96,12 +94,12 @@ getPMML <- function(json_data){
          randomForest = {
            print("randomforest")
            fit <- randomForest(label ~ ., data=sensorvalues)
-           return(saveXML(pmml(fit), paste(sensorNames,"_",predictionClass,"_",classifier,".xml",sep="")))
+           return(saveXML(pmml(fit)))
          },
          naiveBayes = {
            print("naiveBayes")
            fit <- naiveBayes(label ~ ., data=sensorvalues)
-           return(saveXML(pmml(fit,dataset=sensorvalues,predictedField="Class"),paste(sensorNames,"_",predictionClass,"_",classifier,".xml",sep="")))
+           return(saveXML(pmml(fit,dataset=sensorvalues,predictedField="Class")))
          }
   )
   
