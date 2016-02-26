@@ -76,26 +76,26 @@ getPMML <- function(json_data){
   
   ### data preprocessing to correct type (factor, numeric) ###
   
-  sensorvalues <- subset(sensorvalues, select=-c(grep("timestamp", colnames(sensorvalues)),grep("id", colnames(sensorvalues))))
+  sensorvalues <- subset(sensorvalues, select=-c(grep("timestamp", colnames(sensorvalues)),grep("id", colnames(sensorvalues)),grep("absolute", colnames(sensorvalues))))
   sensorvalues$useragent <- as.factor(sensorvalues$useragent)
   sensorvalues$label <- as.factor(sensorvalues$label)
   sensorvalues[,-c(grep("useragent", colnames(sensorvalues)),grep("label", colnames(sensorvalues)))] <- sapply(sensorvalues[, -c(grep("useragent", colnames(sensorvalues)),grep("label", colnames(sensorvalues)))], as.numeric)
-  
+
   switch(classifier,
          rpart = {
            print("rpart")
            fit <- rpart(label ~ ., data=sensorvalues,maxsurrogate=0) # no surrogates as it is easier to be handled, esp. if we want to reuse the code for randomForests
-           return(saveXML(pmml(fit)))
+           print(saveXML(pmml(fit)))
          },
          randomForest = {
            print("randomForest")
-           fit <- randomForest(label ~ ., data=sensorvalues)
-           return(saveXML(pmml(fit)))
+           fit <- randomForest(label ~ ., data=sensorvalues,na.action=na.roughfix)
+           print(saveXML(pmml(fit)))
          },
          naiveBayes = {
            print("naiveBayes")
            fit <- naiveBayes(label ~ ., data=sensorvalues)
-           return(saveXML(pmml(fit,dataset=sensorvalues,predictedField="Class")))
+           print(saveXML(pmml(fit,dataset=sensorvalues,predictedField="Class")))
          }
   )
   
