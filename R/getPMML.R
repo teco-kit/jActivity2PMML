@@ -81,27 +81,21 @@ getPMML <- function(json_data){
   sensorvalues$label <- as.factor(sensorvalues$label)
   sensorvalues[,-c(grep("useragent", colnames(sensorvalues)),grep("label", colnames(sensorvalues)))] <- sapply(sensorvalues[, -c(grep("useragent", colnames(sensorvalues)),grep("label", colnames(sensorvalues)))], as.numeric)
   
-  
-  sn = paste(sensorNames,collapse='-' )
-  output = paste(sn,"_",classifier,".xml",sep="")
-  
-  # TODO: problem mit leerzeichen in predictionClass --> anders übergeben und dann oben für mysql neu aufbereiten
-  
   switch(classifier,
          rpart = {
            print("rpart")
            fit <- rpart(label ~ ., data=sensorvalues,maxsurrogate=0) # no surrogates as it is easier to be handled, esp. if we want to reuse the code for randomForests
            return(saveXML(pmml(fit)))
          },
-         ramdomForest = {
-           print("randomforest")
-           fit <- ramdomForest(label ~ ., data=sensorvalues)
-           return(saveXML(pmml(fit), paste(sensorNames,"_",predictionClass,"_",classifier,".xml",sep="")))
+         randomForest = {
+           print("randomForest")
+           fit <- randomForest(label ~ ., data=sensorvalues)
+           return(saveXML(pmml(fit)))
          },
          naiveBayes = {
            print("naiveBayes")
            fit <- naiveBayes(label ~ ., data=sensorvalues)
-           return(saveXML(pmml(fit,dataset=sensorvalues,predictedField="Class"),paste(sensorNames,"_",predictionClass,"_",classifier,".xml",sep="")))
+           return(saveXML(pmml(fit,dataset=sensorvalues,predictedField="Class")))
          }
   )
   
