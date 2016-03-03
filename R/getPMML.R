@@ -78,7 +78,7 @@ getPMML <- function(json_data){
   
   sensorvalues <- subset(sensorvalues, select=-c(grep("timestamp", colnames(sensorvalues)),grep("id", colnames(sensorvalues)),grep("absolute", colnames(sensorvalues))))
   sensorvalues$useragent <- as.factor(sensorvalues$useragent)
-  sensorvalues$label <- as.factor(sensorvalues$label)
+  sensorvalues$label <- as.factor(tolower(sensorvalues$label))
   sensorvalues[,-c(grep("useragent", colnames(sensorvalues)),grep("label", colnames(sensorvalues)))] <- sapply(sensorvalues[, -c(grep("useragent", colnames(sensorvalues)),grep("label", colnames(sensorvalues)))], as.numeric)
 
   switch(classifier,
