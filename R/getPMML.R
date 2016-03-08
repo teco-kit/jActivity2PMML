@@ -34,32 +34,33 @@ getPMML <- function(json_data){
   
   # if we want to get sensor data dynamically 
   library(foreach)
-  ifelse(grepl("other",predictionClass),{ 
-    # if "other" in predictionClass then get everything to define later on that other is the rest
-    foreach(s=sensorNames)%do%
-    {
-      query = paste("select * from ",s," where label in ",predictionClassDB,sep="")
-      print(query)
-      assign(s, dbGetQuery(mydb, query))
-    }
-  },{
-    # if only true labels are in predictionClass then only get the prediction class data
-    foreach(s=sensorNames)%do%
-    {
-      query = paste("select * from ",s," where label in ",predictionClassDB,sep="")
-      print(query)
-      assign(s, dbGetQuery(mydb, query))
-    }
+  # if only true labels are in predictionClass then only get the prediction class data
+  foreach(s=sensorNames)%do%
+  {
+    query = paste("select * from ",s," where label in ",predictionClassDB,sep="")
+    print(query)
+    assign(s, dbGetQuery(mydb, query))
   }
-  )
 
   dbDisconnect(mydb) 
   
   # join/merge sensors into one dataframe
   library(plyr)
-  sensorvalues=join(x=devicemotion, y=deviceorientation, by = c("timestamp","useragent","label"), type = "full", match = "first")
+  if(grepl("devicemotion",predictionClass) && grepl("deviceorientation",predictionClass)){
+	  sensorvalues=join(x=devicemotion, y=deviceorientation, by = c("timestamp","useragent","label"), type = "full", match = "first")
+  }
+  else if(grepl("devicemotion",predictionClass) && grepl("touchevents",predictionClass)){
+	  sensorvalues=join(x=devicemotion, y=touchevents, by = c("timestamp","useragent","label"), type = "full", match = "first")
+  }
+  else if(grepl("deviceorientation",predictionClass) && grepl("touchevents",predictionClass)){
+	  sensorvalues=join(x=deviceorientation, y=touchevents, by = c("timestamp","useragent","label"), type = "full", match = "first")
+  }
+  else if(grepl("devicemotion",predictionClass) && grepl("deviceorientation",predictionClass) && grepl("touchevents",predictionClass)){
+      joinhelper=join(x=devicemotion, y=deviceorientation, by = c("timestamp","useragent","label"), type = "full", match = "first")
+	  sensorvalues=join(x=joinhelper, y=touchevents, by = c("timestamp","useragent","label"), type = "full", match = "first")
+  }
   ## TODO: make it dynamic
-    
+	
   ################################
   ### CLASSIFY and CREATE PMML ###
   ################################
