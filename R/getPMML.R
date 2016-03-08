@@ -1,4 +1,9 @@
 getPMML <- function(json_data){
+  
+
+  #for bug fixing or testing issues
+  #library(jsonlite)
+  #json_data = fromJSON('{"sensor": ["devicemotion","touchevents"],"label": ["walking", "standing"],"classifier": "rpart"}')
 
   ########################
   # DEAL WITH JSON INPUT #
@@ -18,7 +23,7 @@ getPMML <- function(json_data){
   library(RMySQL)
     
   # establish a connection to the database
-  mydb = dbConnect(MySQL(), user='admin', password='admin', dbname='jactivity2', host='mysql', port=3306)
+  mydb = dbConnect(MySQL(), user='admin', password='admin', dbname='jactivity2', host='docker.teco.edu', port=3307)
 
   ifelse(length(predictionClass)>1,{
 	  predictionClassDB = paste("(",'"',predictionClass[1],'"',sep="")
@@ -46,16 +51,13 @@ getPMML <- function(json_data){
   
   # join/merge sensors into one dataframe
   library(plyr)
-  if(grepl("devicemotion",sensorNames) && grepl("deviceorientation",sensorNames)){
+  if(("devicemotion" %in% sensorNames) && ("deviceorientation" %in% sensorNames)){
 	  sensorvalues=join(x=devicemotion, y=deviceorientation, by = c("timestamp","useragent","label"), type = "full", match = "first")
-  }
-  else if(grepl("devicemotion",sensorNames) && grepl("touchevents",sensorNames)){
+  } else if(("devicemotion" %in% sensorNames) && ("touchevents" %in% sensorNames)){
 	  sensorvalues=join(x=devicemotion, y=touchevents, by = c("timestamp","useragent","label"), type = "full", match = "first")
-  }
-  else if(grepl("deviceorientation",sensorNames) && grepl("touchevents",sensorNames)){
+  } else if(("deviceorientation" %in% sensorNames) && ("touchevents" %in% sensorNames)){
 	  sensorvalues=join(x=deviceorientation, y=touchevents, by = c("timestamp","useragent","label"), type = "full", match = "first")
-  }
-  else if(grepl("devicemotion",sensorNames) && grepl("deviceorientation",sensorNames) && grepl("touchevents",sensorNames)){
+  } else if(("devicemotion" %in% sensorNames) && ("deviceorientation" %in% sensorNames) && ("touchevents" %in% sensorNames)){
       joinhelper=join(x=devicemotion, y=deviceorientation, by = c("timestamp","useragent","label"), type = "full", match = "first")
 	  sensorvalues=join(x=joinhelper, y=touchevents, by = c("timestamp","useragent","label"), type = "full", match = "first")
   }
