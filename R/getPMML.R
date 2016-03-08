@@ -46,16 +46,16 @@ getPMML <- function(json_data){
   
   # join/merge sensors into one dataframe
   library(plyr)
-  if(grepl("devicemotion",predictionClass) && grepl("deviceorientation",predictionClass)){
+  if(grepl("devicemotion",sensorNames) && grepl("deviceorientation",sensorNames)){
 	  sensorvalues=join(x=devicemotion, y=deviceorientation, by = c("timestamp","useragent","label"), type = "full", match = "first")
   }
-  else if(grepl("devicemotion",predictionClass) && grepl("touchevents",predictionClass)){
+  else if(grepl("devicemotion",sensorNames) && grepl("touchevents",sensorNames)){
 	  sensorvalues=join(x=devicemotion, y=touchevents, by = c("timestamp","useragent","label"), type = "full", match = "first")
   }
-  else if(grepl("deviceorientation",predictionClass) && grepl("touchevents",predictionClass)){
+  else if(grepl("deviceorientation",sensorNames) && grepl("touchevents",sensorNames)){
 	  sensorvalues=join(x=deviceorientation, y=touchevents, by = c("timestamp","useragent","label"), type = "full", match = "first")
   }
-  else if(grepl("devicemotion",predictionClass) && grepl("deviceorientation",predictionClass) && grepl("touchevents",predictionClass)){
+  else if(grepl("devicemotion",sensorNames) && grepl("deviceorientation",sensorNames) && grepl("touchevents",sensorNames)){
       joinhelper=join(x=devicemotion, y=deviceorientation, by = c("timestamp","useragent","label"), type = "full", match = "first")
 	  sensorvalues=join(x=joinhelper, y=touchevents, by = c("timestamp","useragent","label"), type = "full", match = "first")
   }
