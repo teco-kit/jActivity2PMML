@@ -23,7 +23,8 @@ getPMML <- function(json_data){
   library(RMySQL)
     
   # establish a connection to the database
-  mydb = dbConnect(MySQL(), user='admin', password='admin', dbname='jactivity2', host='docker.teco.edu', port=3307)
+  mydb = dbConnect(MySQL(), user='admin', password='admin', dbname='jactivity2', host='docker.teco.edu', port=3306)
+  #for bug fixing or testing issues use port 3307
 
   ifelse(length(predictionClass)>1,{
 	  predictionClassDB = paste("(",'"',predictionClass[1],'"',sep="")
@@ -58,8 +59,10 @@ getPMML <- function(json_data){
   } else if(("deviceorientation" %in% sensorNames) && ("touchevents" %in% sensorNames)){
 	  sensorvalues=join(x=deviceorientation, y=touchevents, by = c("timestamp","useragent","label"), type = "full", match = "first")
   } else if(("devicemotion" %in% sensorNames) && ("deviceorientation" %in% sensorNames) && ("touchevents" %in% sensorNames)){
-      joinhelper=join(x=devicemotion, y=deviceorientation, by = c("timestamp","useragent","label"), type = "full", match = "first")
+    joinhelper=join(x=devicemotion, y=deviceorientation, by = c("timestamp","useragent","label"), type = "full", match = "first")
 	  sensorvalues=join(x=joinhelper, y=touchevents, by = c("timestamp","useragent","label"), type = "full", match = "first")
+  } else {
+    sensorvalues = get(sensorNames)
   }
   ## TODO: make it dynamic
 	
