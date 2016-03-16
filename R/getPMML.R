@@ -23,8 +23,8 @@ getPMML <- function(json_data){
   library(RMySQL)
     
   # establish a connection to the database
-  mydb = dbConnect(MySQL(), user='admin', password='admin', dbname='jactivity2', host='docker.teco.edu', port=3306)
-  #for bug fixing or testing issues use port 3307
+  mydb = dbConnect(MySQL(), user='admin', password='admin', dbname='jactivity2', host='mysql', port=3306)
+  #for bug fixing or testing issues use port 3307 and your own host
 
   ifelse(length(predictionClass)>1,{
 	  predictionClassDB = paste("(",'"',predictionClass[1],'"',sep="")
