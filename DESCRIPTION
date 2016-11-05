@@ -8,4 +8,3 @@ Maintainer: Anja Bachmann <bachmann@teco.edu>
 Description: This package blabla.
 License: GPL 3
 LazyData: true
-Imports: RMySQL,foreach,plyr,pmml,rpart,jsonlite
