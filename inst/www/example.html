@@ -11,7 +11,7 @@
 
     <!-- Bootstrap core CSS -->
     <!--link href="//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet"-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/css/jasny-bootstrap.min.css" />
+    <link href="dist/css/jasny-bootstrap.min.css" rel="stylesheet">
 
     <!-- Custom styles for this template -->
     <link href="navmenu-push.css" rel="stylesheet">
@@ -34,7 +34,7 @@
 
 	<hgroup>
 		<h1 class="site-title"><a href="http://www.prosperity4all.eu/" title="Prosperity4All. One-size-fits-one digital inclusion" rel="home">
-		<img src="logo_prosperity.png" role="logo"></a></h1>
+		<img src="files/logo_prosperity.png" role="logo"></a></h1>
     </hgroup>
 
 		<!--redo navigation to fit the slide-in-navmenu-->
@@ -132,7 +132,7 @@ technology based access solutions required.</p>
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <!--script src="dist/js/bootstrap.min.js"></script-->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jasny-bootstrap/3.1.3/js/jasny-bootstrap.min.js" integrity="sha256-zrKYjrV5tdhLTivmOO9TAI5x6i5dcMVO4YOi/zUAqrk=" crossorigin="anonymous"></script>
+    <script src="dist/js/jasny-bootstrap.min.js"></script>
     <script src="js/offcanvas.js"></script>
 	<!-- jactivity scripts -->
 	<!-- <script src="newjs/jactivity_babel.js"></script> -->
@@ -169,7 +169,7 @@ technology based access solutions required.</p>
 			}
 		}
 
-	        var activityClassifier = new jActivity("../",[devicemotion],activityCallback, ["walking","standing"], 1000);
+	        var activityClassifier = new jActivity("http://localhost/ocpu/library/jActivity2PMML/",[devicemotion],activityCallback, ["walking","standing"], 1000);
 
 		//var touchClassifier = jActivite("js/",touchCallback, ["left","right"], 10000);
 	</script>
