@@ -140,6 +140,7 @@ technology based access solutions required.</p>
 	<script src="js/decisiontree_engine.js"></script>
 
 	<script src="js/jactivity.js"></script>
+	<script src="js/devicemotion.js"></script>
 
         <script>
 	    var activityCallback = function(activity) {
@@ -168,7 +169,7 @@ technology based access solutions required.</p>
 			}
 		}
 
-	        var activityClassifier = new jActivity("http://localhost/ocpu/library/jActivity2PMML/",["devicemotion"],activityCallback, ["walking","standing"], 1000);
+	        var activityClassifier = new jActivity("http://localhost/ocpu/library/jActivity2PMML/",[devicemotion],activityCallback, ["walking","standing"], 1000);
 
 		//var touchClassifier = jActivite("js/",touchCallback, ["left","right"], 10000);
 	</script>

@@ -1,12 +1,24 @@
 class jActivity {
-	constructor(base, sensors, callback, label, interval) {
-		this.sensors = sensors
+	constructor(base, sensorClasses, callback, label, interval) {
 		this.callback = callback
 		this.label = label
 		this.interval = interval
 		this.base = base
 
-		this.dataset = {}
+		var dataset = {}
+		this.dataset = dataset; 
+
+		var sensors = []
+		this.sensors = sensors; 
+
+
+		sensorClasses.forEach(function (sensorClass)
+		{
+			var sensor= new sensorClass(dataset);
+			sensors.push(sensorClass.name)
+		}
+		)
+		
 
 		// get stylesheet for transformation 
 		// TODO: could store this globally to not trigger recompilation 
@@ -47,21 +59,21 @@ class jActivity {
 			{ 
 				this.classifier = p[0](p[1]) //generate and store classifiier 
 				// then call by interval assuming someone fills the dataset
-				window.setInterval((...args) => 
-					 function() {
+				window.setInterval(
+					function(scope) {
 						 // calculate features
 						 // TODO: currently only average!!!
 						 let averageData = {}
 
-						 for (var feature in this.dataset) {
+						 for (var feature in scope.dataset) {
 
-							 averageData[feature] = this.dataset[feature].reduce(function(a, b) { return a + b }, 0) / this.dataset[feature].length
-							 this.dataset[feature] = [] //clear this
+							 averageData[feature] = scope.dataset[feature].reduce(function(a, b) { return a + b }, 0) / scope.dataset[feature].length
+							 scope.dataset[feature] = [] //clear this
 						 }
 
-						 this.callback(this.classifier.evaluate(averageData))
+						 scope.callback(scope.classifier.evaluate(averageData))
 					 }
-					 , interval)
+					 , interval,this)
 			}
 		)
 	}
