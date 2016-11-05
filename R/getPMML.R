@@ -1,112 +1,63 @@
-getPMML <- function(json_data){
-  
-
-  #for bug fixing or testing issues
-  #library(jsonlite)
-  #json_data = fromJSON('{"sensor": ["devicemotion","touchevents"],"label": ["walking", "standing"],"classifier": "rpart"}')
-
-  ########################
-  # DEAL WITH JSON INPUT #
-  ########################
-  
-  sensorNames = json_data$sensor
-  
-  predictionClass = json_data$label
-  
-  classifier = json_data$classifier
-  
-  
-  ###################
-  ### GET SENSORS ###
-  ###################
-
+getSensorsSQL <- function(sensors, classes, host='jactivity', port=3306, dbname='jactivity2')
+{
   library(RMySQL)
-    
   # establish a connection to the database
-  mydb = dbConnect(MySQL(), user='admin', password='admin', dbname='jactivity2', host='mysql', port=3306)
+  mydb = dbConnect(MySQL(), user='admin', password='admin', dbname=dbname, host=host, port=port )
   #for bug fixing or testing issues use port 3307 and your own host
 
-  ifelse(length(predictionClass)>1,{
-	  predictionClassDB = paste("(",'"',predictionClass[1],'"',sep="")
-	  for(i in 2:length(predictionClass)) 
-	  {
-		  predictionClassDB = paste(predictionClassDB,", ",'"',predictionClass[i],'"',sep="")
-	  }  
-	  predictionClassDB = paste(predictionClassDB,")",sep="")
-  },{
-	  predictionClassDB = paste("(",'"',predictionClass,'"',")",sep="")
-  })
+    
+  predictionClassDB = paste("(", 
+                            paste('"',classes,'"',collapse=',',sep=''),
+                            ")",sep="")
+  ids=c("id","timestamp","useragent","label")
+  # join/merge sensors into one dataframe on ids
+  joinhelper<-function(x,y) {plyr::join(x, y, by = ids, type = "full", match = "first")}
   
   
-  # if we want to get sensor data dynamically 
   library(foreach)
-  # if only true labels are in predictionClass then only get the prediction class data
-  foreach(s=sensorNames)%do%
+  res=foreach(s=sensors,.combine="joinhelper")%do%
   {
     query = paste("select * from ",s," where label in ",predictionClassDB,sep="")
-    print(query)
-    assign(s, dbGetQuery(mydb, query))
+    
+    v<-dbGetQuery(mydb, query)
+    
+    # if we want to make them unique and expose the sensor names: names(v)[0:-4]<- gsub("^", paste(s,".",sep="") , names(v)[0:-4])
+    
+    v
+    
   }
-
+  
+  # remove ids
+  res <-subset(res,select=-c(timestamp,id,useragent))
+  
+  # label to factor  
+  res$label <- as.factor(tolower(res$label))
+  
+  # the rest to numeric
+  res[,-grep("label", colnames(res))] <- sapply(res[,-grep("label", colnames(res))], as.numeric)
+ 
   dbDisconnect(mydb) 
-  
-  # join/merge sensors into one dataframe
-  library(plyr)
-  if(("devicemotion" %in% sensorNames) && ("deviceorientation" %in% sensorNames)){
-	  sensorvalues=join(x=devicemotion, y=deviceorientation, by = c("timestamp","useragent","label"), type = "full", match = "first")
-  } else if(("devicemotion" %in% sensorNames) && ("touchevents" %in% sensorNames)){
-	  sensorvalues=join(x=devicemotion, y=touchevents, by = c("timestamp","useragent","label"), type = "full", match = "first")
-  } else if(("deviceorientation" %in% sensorNames) && ("touchevents" %in% sensorNames)){
-	  sensorvalues=join(x=deviceorientation, y=touchevents, by = c("timestamp","useragent","label"), type = "full", match = "first")
-  } else if(("devicemotion" %in% sensorNames) && ("deviceorientation" %in% sensorNames) && ("touchevents" %in% sensorNames)){
-    joinhelper=join(x=devicemotion, y=deviceorientation, by = c("timestamp","useragent","label"), type = "full", match = "first")
-	  sensorvalues=join(x=joinhelper, y=touchevents, by = c("timestamp","useragent","label"), type = "full", match = "first")
-  } else {
-    sensorvalues = get(sensorNames)
-  }
-  ## TODO: make it dynamic
-	
-  ################################
-  ### CLASSIFY and CREATE PMML ###
-  ################################
-  
-  library(pmml)
-  library(XML)
-  # https://cran.r-project.org/web/packages/pmml/pmml.pdf
-  # note: package pmml, version 1.5.0. License: GPL (>= 2.1)
-  
-  library(rpart) #rpart
-  library(randomForest) # randomForest
-  library(e1071) #naiveBayes,SVM
+  return(res)
+}
 
-  
-  ### data preprocessing to correct type (factor, numeric) ###
-  
-  sensorvalues <- subset(sensorvalues, select=-c(grep("timestamp", colnames(sensorvalues)),grep("id", colnames(sensorvalues)),grep("useragent", colnames(sensorvalues)),grep("absolute", colnames(sensorvalues))))
-#  sensorvalues <- subset(sensorvalues, select=-c(grep("timestamp", colnames(sensorvalues)),grep("id", colnames(sensorvalues)),grep("absolute", colnames(sensorvalues))))
+getModel <- function(classifier,sensorvalues)
+{
+  fit <- switch(classifier,
+     rpart=rpart::rpart(label ~ ., data=sensorvalues,maxsurrogate=0) # no surrogates as it is easier to be handled, esp. if we want to reuse the code for randomForests
+    ,randomForest=randomForest::randomForest(label ~ ., data=sensorvalues,na.action=randomForest::na.roughfix)
+    ,naiveBayes=e1071::naiveBayes(label ~ ., data=sensorvalues)
+    ,warning("classifier not supported yet")
+    )
+}
 
-#  sensorvalues$useragent <- as.factor(sensorvalues$useragent)
-  sensorvalues$label <- as.factor(tolower(sensorvalues$label))
-
-  #  sensorvalues[,-c(grep("useragent", colnames(sensorvalues)),grep("label", colnames(sensorvalues)))] <- sapply(sensorvalues[, -c(grep("useragent", colnames(sensorvalues)),grep("label", colnames(sensorvalues)))], as.numeric)
-  sensorvalues[,-c(grep("label", colnames(sensorvalues)))] <- sapply(sensorvalues[,-c(grep("label", colnames(sensorvalues)))], as.numeric)
-
-  switch(classifier,
-         rpart = {
-           #print("rpart")
-           fit <- rpart(label ~ ., data=sensorvalues,maxsurrogate=0) # no surrogates as it is easier to be handled, esp. if we want to reuse the code for randomForests
-           return(saveXML(pmml(fit)))
-         },
-         randomForest = {
-           #print("randomForest")
-           fit <- randomForest(label ~ ., data=sensorvalues,na.action=na.roughfix)
-           return(saveXML(pmml(fit)))
-         },
-         naiveBayes = {
-           #print("naiveBayes")
-           fit <- naiveBayes(label ~ ., data=sensorvalues)
-           return(saveXML(pmml(fit,dataset=sensorvalues,predictedField="Class")))
-         }
-  )
+getPMML <- function(json_data=jsonlite::fromJSON('{"sensor": ["devicemotion","touchevents"],"label": ["walking", "standing"],"classifier": "rpart"}')){
   
+  #get sensordata from server for labels
+  sensorvalues <- getSensorsSQL(json_data$sensor, json_data$label)
+  
+
+  #learn model
+  fit=getModel(json_data$classifier, sensorvalues)
+ 
+  invisible(XML::saveXML(pmml::pmml(fit)))
 }
